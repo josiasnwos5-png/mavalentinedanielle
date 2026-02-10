@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>💙 Pour Danielle</title>
+
+  <style>
+    :root{
+      --bg1:#dbeafe;        /* bleu très clair */
+      --bg2:#2563eb;        /* bleu Danielle */
+      --card:#ffffffde;
+      --primary:#1d4ed8;
+      --primary2:#0ea5e9;
+      --text:#0f172a;
+      --muted:#475569;
+      --shadow: 0 24px 70px rgba(0,0,0,.25);
+      --radius: 24px;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:22px 0;
+      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Arial,sans-serif;
+      color:var(--text);
+    }
+    .card{
+      width:min(640px, 92vw);
+      background: var(--card);
+      backdrop-filter: blur(10px);
+      border-radius: var(--radius);
+      padding: 22px 18px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+    .header{
+      text-align:center;
+      margin-bottom: 10px;
+    }
+    .emoji{
+      font-size: 42px;
+      line-height: 1;
+      margin: 6px 0 10px;
+      filter: drop-shadow(0 8px 12px rgba(0,0,0,.15));
+    }
+    h1{
+      margin:0;
+      font-size: 26px;
+      letter-spacing:.2px;
+    }
+    .subtitle{
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+    .progress{
+      display:flex;
+      gap:6px;
+      justify-content:center;
+      margin: 14px 0 12px;
+    }
+    .dot{
+      width:9px; height:9px;
+      border-radius:999px;
+      background: rgba(255,255,255,.6);
+      outline: 1px solid rgba(0,0,0,.06);
+    }
+    .dot.active{ background: rgba(29,78,216,.95); }
+    .panel{
+      animation: fadeIn .35s ease;
+    }
+    @keyframes fadeIn{
+      from { opacity:0; transform: translateY(6px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+    .photo{
+      width:100%;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+      border-radius: 18px;
+      margin: 12px 0;
+      box-shadow: 0 14px 30px rgba(0,0,0,.18);
+      background: rgba(255,255,255,.6);
+    }
+    .box{
+      background:#fff;
+      border-radius: 18px;
+      padding: 15px 14px;
+      margin: 12px 0 10px;
+      font-size: 17px;
+      line-height: 1.38;
+      text-align:left;
+      box-shadow: 0 10px 22px rgba(0,0,0,.08);
+    }
+    .box strong{ font-weight: 800; }
+    .btns{
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      flex-wrap:wrap;
+      margin-top: 12px;
+    }
+    button{
+      border:0;
+      border-radius:999px;
+      padding: 12px 18px;
+      font-size: 16px;
+      font-weight: 750;
+      cursor:pointer;
+      transition: transform .06s ease, opacity .2s ease;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button:active{ transform: scale(.98); }
+    .primary{ background: var(--primary); color:white; }
+    .ghost{ background:#0f172a; color:white; opacity:.92; }
+    .quizWrap{
+      margin-top: 6px;
+    }
+    .quizAnswers{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top: 10px;
+    }
+    .ans{
+      background: #e2e8f0;
+      color: #0f172a;
+      font-weight: 700;
+    }
+    .ans.correct{
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      color: white;
+    }
+    .ans.wrong{
+      opacity:.45;
+    }
+    .hint{
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align:center;
+    }
+    .result{
+      margin-top: 12px;
+      font-size: 18px;
+      font-weight: 900;
+      text-align:center;
+      display:none;
+    }
+    .secret{
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--muted);
+      text-align:center;
+      display:none;
+    }
+    .footerNote{
+      margin-top: 12px;
+      font-size: 12px;
+      color: rgba(15,23,42,.6);
+      text-align:center;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="card">
+    <div class="header">
+      <div class="emoji" id="emoji">💙</div>
+      <h1 id="title">Danielle</h1>
+      <div class="subtitle" id="subtitle">J’ai un petit parcours à te faire lire…</div>
+    </div>
+
+    <div class="progress" id="progress"></div>
+
+    <section class="panel" id="panel"></section>
+
+    <div class="btns" id="nav">
+      <button class="ghost" id="backBtn">◀ Retour</button>
+      <button class="primary" id="nextBtn">Continuer ▶</button>
+    </div>
+
+    <div class="footerNote" id="footerNote">Prends ton temps. 💙</div>
+  </main>
+
+<script>
+/**
+ * ✅ PERSONNALISATION RAPIDE (si tu veux)
+ * - Tu peux remplacer les images Unsplash par vos photos plus tard.
+ * - Pour ça : mets tes images dans le repo (ex: bar.jpg, rose.jpg, quai33.jpg)
+ *   puis remplace src par "bar.jpg" etc.
+ */
+
+// Images libres (tu peux remplacer)
+const IMG = {
+  intro: "https://images.unsplash.com/photo-1520975958225-21b1b2e5aa44?auto=format&fit=crop&w=1400&q=70",
+  bar:   "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=1400&q=70",
+  rose:  "https://images.unsplash.com/photo-1520975661595-6453be3f7070?auto=format&fit=crop&w=1400&q=70",
+  resto: "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1400&q=70",
+  book:  "https://images.unsplash.com/photo-1519682337058-a94d519337bc?auto=format&fit=crop&w=1400&q=70",
+  final: "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=1400&q=70"
+};
+
+const steps = [
+  {
+    emoji:"💙",
+    title:"Danielle",
+    subtitle:"J’ai envie de te dire ça avec le cœur.",
+    img: IMG.intro,
+    text:"Depuis plus d’un an, nos vies se sont croisées… et plus le temps passe, plus je me rends compte à quel point tu prends une place sincère et précieuse dans mon cœur."
+  },
+  {
+    emoji:"🍸",
+    title:"Notre premier date",
+    subtitle:"Ce moment, je ne l’ai pas oublié.",
+    img: IMG.bar,
+    text:"Je repense souvent à notre premier rendez-vous dans ce bar plutôt sympa. L’ambiance, les discussions, ton sourire… C’est un souvenir qui reste, parce que c’était simple et vrai."
+  },
+  {
+    emoji:"🧠",
+    title:"Petit quizz",
+    subtitle:"Juste pour sourire un peu…",
+    quiz:{
+      q:"Ça fait combien de temps qu’on se connaît ?",
+      a:["Quelques mois","Plus d’un an","Depuis toujours"],
+      correct:1,
+      ok:"Oui… plus d’un an. Et j’aime ce qu’on devient. 💙",
+      nope:"Presque 😄 (la bonne réponse : plus d’un an)"
+    }
+  },
+  {
+    emoji:"🤍",
+    title:"La rose blanche",
+    subtitle:"Un détail… mais pas pour moi.",
+    img: IMG.rose,
+    text:"Je n’ai pas oublié la rose blanche que je t’ai offerte à notre rendez-vous. C’était un geste simple, mais rempli de ce que je ressentais : l’envie de te faire sourire, et de prendre soin de toi."
+  },
+  {
+    emoji:"🍽️",
+    title:"Quai 33",
+    subtitle:"Un souvenir que je garde fort.",
+    img: IMG.resto,
+    text:"Et notre déjeuner au restaurant Quai 33… c’était fluide, naturel, doux. Un souvenir que je porte sérieusement dans mon cœur — parce que c’était “nous”, sans effort."
+  },
+  {
+    emoji:"🎯",
+    title:"Petit quizz",
+    subtitle:"Tu connais mes détails 😌",
+    quiz:{
+      q:"Quelle est ma couleur préférée ?",
+      a:["Rouge","Bleu","Noir"],
+      correct:1,
+      ok:"Oui… le bleu. Comme toi. 💙",
+      nope:"Non 😄 (la bonne réponse : bleu, comme toi)"
+    }
+  },
+  {
+    emoji:"📖",
+    title:"Le livre",
+    subtitle:"Je tiens vraiment à ça.",
+    img: IMG.book,
+    text:"Je veux aussi te dire un truc important : j’aimerais vraiment que tu écoutes le livre que je t’ai partagé. Ce n’était pas au hasard… c’est une façon de te faire entrer un peu plus dans mon monde."
+  },
+  {
+    emoji:"⚽",
+    title:"Petit quizz",
+    subtitle:"Facile 😄",
+    quiz:{
+      q:"Mon sport préféré ?",
+      a:["Basket","Tennis","Foot"],
+      correct:2,
+      ok:"Exact 😄 le foot.",
+      nope:"Pas loin 😉 (la bonne réponse : le foot)"
+    }
+  },
+  {
+    emoji:"🎂",
+    title:"Dernier quizz",
+    subtitle:"Tu te souviens ?",
+    quiz:{
+      q:"Quelle est la date de mon anniversaire ?",
+      a:["12 février","6 mars","18 avril"],
+      correct:1,
+      ok:"Oui… le 6 mars. Tu me connais. 💙",
+      nope:"Raté 😄 (la bonne réponse : 6 mars)"
+    }
+  },
+  {
+    emoji:"⏳",
+    title:"Une seconde…",
+    subtitle:"Avant la dernière question.",
+    pause: true,
+    text:"Prends une seconde. Respire. Ce que je vais te dire maintenant compte vraiment."
+  },
+  {
+    emoji:"🌹",
+    title:"Alors…",
+    subtitle:"Je te pose la question avec le cœur.",
+    img: IMG.final,
+    final: true,
+    text:"Tout ça, ce sont des souvenirs, des intentions et des sentiments bien réels."
+  }
+];
+
+const emojiEl = document.getElementById("emoji");
+const titleEl = document.getElementById("title");
+const subtitleEl = document.getElementById("subtitle");
+const panelEl = document.getElementById("panel");
+const progressEl = document.getElementById("progress");
+const backBtn = document.getElementById("backBtn");
+const nextBtn = document.getElementById("nextBtn");
+const footerNote = document.getElementById("footerNote");
+
+let idx = 0;
+
+function buildProgress(){
+  progressEl.innerHTML = "";
+  for(let i=0;i<steps.length;i++){
+    const d = document.createElement("div");
+    d.className = "dot" + (i===idx ? " active" : "");
+    progressEl.appendChild(d);
+  }
+}
+
+function htmlEscape(s){
+  return (s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function render(){
+  const s = steps[idx];
+  buildProgress();
+
+  emojiEl.textContent = s.emoji || "💙";
+  titleEl.textContent = s.title || "";
+  subtitleEl.textContent = s.subtitle || "";
+
+  // panel
+  panelEl.innerHTML = "";
+  panelEl.classList.remove("panel");
+  void panelEl.offsetWidth; // restart animation
+  panelEl.classList.add("panel");
+
+  if (s.img){
+    const img = document.createElement("img");
+    img.className = "photo";
+    img.alt = "Souvenir";
+    img.src = s.img;
+    panelEl.appendChild(img);
+  }
+
+  const box = document.createElement("div");
+  box.className = "box";
+
+  if (s.quiz){
+    box.innerHTML = `<strong>${htmlEscape(s.quiz.q)}</strong>`;
+    const wrap = document.createElement("div");
+    wrap.className = "quizWrap";
+
+    const answers = document.createElement("div");
+    answers.className = "quizAnswers";
+
+    const feedback = document.createElement("div");
+    feedback.className = "result";
+
+    let answered = false;
+
+    s.quiz.a.forEach((ansText, aIdx) => {
+      const b = document.createElement("button");
+      b.className = "ans";
+      b.textContent = ansText;
+
+      b.addEventListener("click", () => {
+        if (answered) return;
+        answered = true;
+
+        const all = answers.querySelectorAll("button");
+        all.forEach(btn => btn.disabled = true);
+
+        if (aIdx === s.quiz.correct){
+          b.classList.add("correct");
+          feedback.style.display = "block";
+          feedback.textContent = s.quiz.ok || "✅ Bonne réponse !";
+        } else {
+          b.classList.add("wrong");
+          all[s.quiz.correct].classList.add("correct");
+          feedback.style.display = "block";
+          feedback.textContent = s.quiz.nope || "❌ Pas tout à fait.";
+        }
+      });
+
+      answers.appendChild(b);
+    });
+
+    wrap.appendChild(answers);
+    wrap.appendChild(feedback);
+    box.appendChild(wrap);
+    panelEl.appendChild(box);
+
+  } else {
+    box.textContent = s.text || "";
+    panelEl.appendChild(box);
+  }
+
+  // Final
+  if (s.final){
+    const ask = document.createElement("div");
+    ask.className = "box";
+    ask.innerHTML = `
+      <strong>Danielle, veux-tu être ma Valentine ? 💙🌹</strong><br><br>
+      <span style="color: var(--muted);">
+        Un moment simple tous les deux, et juste profiter… toi et moi.
+      </span>
+    `;
+    panelEl.appendChild(ask);
+
+    const btns = document.createElement("div");
+    btns.className = "btns";
+    btns.innerHTML = `
+      <button class="primary" id="yesBtn">Oui 💙</button>
+      <button class="ghost" id="noBtn">Non 😅</button>
+    `;
+    panelEl.appendChild(btns);
+
+    const res = document.createElement("div");
+    res.className = "result";
+    res.id = "finalResult";
+    panelEl.appendChild(res);
+
+    const secret = document.createElement("div");
+    secret.className = "secret";
+    secret.id = "secretNote";
+    secret.textContent = "Merci d’avoir pris le temps de tout lire. Peu importe ta réponse, chaque mot était sincère. 💙";
+    panelEl.appendChild(secret);
+
+    const yesBtn = btns.querySelector("#yesBtn");
+    const noBtn  = btns.querySelector("#noBtn");
+
+    yesBtn.addEventListener("click", () => {
+      res.style.display = "block";
+      res.textContent = "Yesss 😍 Alors c’est un date. 💙";
+      secret.style.display = "block";
+      yesBtn.disabled = true;
+      noBtn.disabled = true;
+      confetti();
+    });
+
+    const noTexts = ["T’es sûre ? 🙃","Re-réfléchis 😌","Allez stp 🥺","Dernière chance 😳","Ok… mais non 😈"];
+    let n=0;
+    noBtn.addEventListener("click", () => {
+      n = (n+1) % noTexts.length;
+      noBtn.textContent = noTexts[n];
+      const dx = (Math.random()*140)-70;
+      const dy = (Math.random()*80)-40;
+      noBtn.style.transform = `translate(${dx}px,${dy}px)`;
+      setTimeout(()=> noBtn.style.transform = "translate(0,0)", 420);
+      secret.style.display = "block";
+    });
+  }
+
+  // Pause step: lock navigation briefly
+  if (s.pause){
+    footerNote.textContent = "…";
+    backBtn.disabled = true;
+    nextBtn.disabled = true;
+    nextBtn.textContent = "Un instant…";
+    setTimeout(() => {
+      backBtn.disabled = (idx===0);
+      nextBtn.disabled = false;
+      nextBtn.textContent = "Continuer ▶";
+      footerNote.textContent = "Prends ton temps. 💙";
+    }, 1800);
+  } else {
+    footerNote.textContent = "Prends ton temps. 💙";
+    backBtn.disabled = false;
+    nextBtn.disabled = false;
+  }
+
+  // Nav buttons state
+  backBtn.style.display = (idx===0) ? "none" : "inline-block";
+  nextBtn.style.display = (idx===steps.length-1) ? "none" : "inline-block";
+  nextBtn.textContent = (idx===steps.length-2) ? "Arriver à la question ▶" : "Continuer ▶";
+}
+
+backBtn.addEventListener("click", () => {
+  idx = Math.max(0, idx-1);
+  render();
+});
+
+nextBtn.addEventListener("click", () => {
+  idx = Math.min(steps.length-1, idx+1);
+  render();
+});
+
+// Confettis légers
+function confetti(){
+  const count = 80;
+  for(let k=0;k<count;k++){
+    const s = document.createElement("span");
+    s.textContent = ["💙","✨","🌹","🤍","💫"][Math.floor(Math.random()*5)];
+    s.style.position="fixed";
+    s.style.left = Math.random()*100+"vw";
+    s.style.top  = "-10vh";
+    s.style.fontSize = (14+Math.random()*18)+"px";
+    s.style.zIndex = 9999;
+    s.style.transition = "transform 1.4s ease, opacity 1.4s ease";
+    document.body.appendChild(s);
+    requestAnimationFrame(()=>{
+      s.style.transform = `translateY(${110+Math.random()*40}vh) rotate(${Math.random()*360}deg)`;
+      s.style.opacity = "0";
+    });
+    setTimeout(()=> s.remove(), 1500);
+  }
+}
+
+render();
+</script>
+</body>
+</html>
